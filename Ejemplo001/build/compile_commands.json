@@ -1,0 +1,20 @@
+[
+{
+  "directory": "C:/tools/progr_paralela/Ejemplo001/build",
+  "command": "C:\\tools\\mingw64\\bin\\g++.exe -DFMT_SHARED -DCMAKE_INTDIR=\\\"Debug\\\" -isystem C:/tools/vcpkg-2026.03.18/installed/x64-mingw-dynamic/include -g -o CMakeFiles\\ejemplo001.dir\\Debug\\main.cpp.obj -c C:\\tools\\progr_paralela\\Ejemplo001\\main.cpp",
+  "file": "C:/tools/progr_paralela/Ejemplo001/main.cpp",
+  "output": "C:/tools/progr_paralela/Ejemplo001/build/CMakeFiles/ejemplo001.dir/Debug/main.cpp.obj"
+},
+{
+  "directory": "C:/tools/progr_paralela/Ejemplo001/build",
+  "command": "C:\\tools\\mingw64\\bin\\g++.exe -DFMT_SHARED -DCMAKE_INTDIR=\\\"Release\\\" -isystem C:/tools/vcpkg-2026.03.18/installed/x64-mingw-dynamic/include -O3 -DNDEBUG -o CMakeFiles\\ejemplo001.dir\\Release\\main.cpp.obj -c C:\\tools\\progr_paralela\\Ejemplo001\\main.cpp",
+  "file": "C:/tools/progr_paralela/Ejemplo001/main.cpp",
+  "output": "C:/tools/progr_paralela/Ejemplo001/build/CMakeFiles/ejemplo001.dir/Release/main.cpp.obj"
+},
+{
+  "directory": "C:/tools/progr_paralela/Ejemplo001/build",
+  "command": "C:\\tools\\mingw64\\bin\\g++.exe -DFMT_SHARED -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" -isystem C:/tools/vcpkg-2026.03.18/installed/x64-mingw-dynamic/include -O2 -g -DNDEBUG -o CMakeFiles\\ejemplo001.dir\\RelWithDebInfo\\main.cpp.obj -c C:\\tools\\progr_paralela\\Ejemplo001\\main.cpp",
+  "file": "C:/tools/progr_paralela/Ejemplo001/main.cpp",
+  "output": "C:/tools/progr_paralela/Ejemplo001/build/CMakeFiles/ejemplo001.dir/RelWithDebInfo/main.cpp.obj"
+}
+]
