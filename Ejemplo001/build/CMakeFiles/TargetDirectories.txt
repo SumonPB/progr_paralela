@@ -1,3 +1,0 @@
-C:/tools/progr_paralela/Ejemplo001/build/CMakeFiles/ejemplo001.dir
-C:/tools/progr_paralela/Ejemplo001/build/CMakeFiles/edit_cache.dir
-C:/tools/progr_paralela/Ejemplo001/build/CMakeFiles/rebuild_cache.dir
