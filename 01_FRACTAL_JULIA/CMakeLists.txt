@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Ejemplo001)
+project(01_FRACTAL_JULIA)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(SFML COMPONENTS 
@@ -9,11 +9,14 @@ find_package(SFML COMPONENTS
                     Window
                     CONFIG REQUIRED)
 
-add_executable(ejemplo001 main.cpp)
+add_executable(01_FRACTAL_JULIA 
+main.cpp
+fractal_serial.cpp
+)
 
-target_link_libraries(ejemplo001 PRIVATE fmt::fmt 
+target_link_libraries(01_FRACTAL_JULIA PRIVATE 
+fmt::fmt 
 SFML::System
 SFML::Graphics
 SFML::Window
-
 )
