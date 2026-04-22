@@ -12,6 +12,8 @@ find_package(SFML COMPONENTS
 add_executable(01_FRACTAL_JULIA 
 main.cpp
 fractal_serial.cpp
+palette.cpp
+fractal_simd.cpp
 )
 
 target_link_libraries(01_FRACTAL_JULIA PRIVATE 
