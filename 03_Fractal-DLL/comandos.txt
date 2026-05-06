@@ -1,0 +1,4 @@
+objdump -p lib03_FRACTAL-DLL.dll | findstr "DLL"
+objdump -p lib03_FRACTAL-DLL.dll | findstr "julia_simd"
+        [   0] +base[   1]  0000 _Z10julia_simdddddjjiPj
+        
