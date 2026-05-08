@@ -93,8 +93,8 @@ public class FractalHilos {
                 fin = inicio + filasPorHilo;
 
             }
-            System.out.println("================================");
-            System.out.println("Hilo " + t + " procesará filas de " + inicio + " a " + fin);
+            //System.out.println("================================");
+            //System.out.println("Hilo " + t + " procesará filas de " + inicio + " a " + fin);
             executor.execute(() -> {
 
                 rangos(
