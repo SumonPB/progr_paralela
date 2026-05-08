@@ -55,7 +55,6 @@ public class FractalHilos {
                 double x = x_min + i * dx;
                 double y = y_max - j * dy;
 
-                // std::complex<double> z(x, y);
 
                 // similar al var
                 var color = acotado_2(x, y);
