@@ -3,14 +3,14 @@ package paralela;
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
+
 
 import java.nio.*;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.*;
+
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class fractalMain {
@@ -23,12 +23,15 @@ public class fractalMain {
 
     FractalCpu fractalCpu;
     FractalSimd fractalSimd;
+    FractalHilos fractalHilos;
     FPSCounter fpsCounter;
     int mode = 1; // 1 cpu, 2 simd
 
     public fractalMain() {
         fractalCpu = new FractalCpu();
+        fractalHilos = new FractalHilos();
         fractalSimd = new FractalSimd();
+        
         fpsCounter = new FPSCounter();
         pixelBuffer = BufferUtils.createIntBuffer(FractalParams.WIDTH * FractalParams.HEIGHT);
     }
@@ -82,6 +85,11 @@ public class fractalMain {
                 System.out.println("Modo C++ SIMD mode");
                 mode = 2;
             }
+            if (key == GLFW_KEY_3 && action == GLFW_RELEASE) {
+                System.out.println("Modo hilos");
+                mode = 3;
+            }
+            
         });
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         glfwSetWindowPos(window,
@@ -160,7 +168,7 @@ public class fractalMain {
     }
 
     private void paint() {
-
+        //cambiar al modo 3
         int fps = fpsCounter.update();
         System.out.println(fps);
         pixelBuffer.clear();
@@ -170,9 +178,18 @@ public class fractalMain {
                     FractalParams.WIDTH, FractalParams.HEIGHT);
             pixelBuffer.put(fractalCpu.pixel_buffer);
 
-        } else {
+        } else if (mode == 2) {
             fractalSimd.JuliaSimd();
             pixelBuffer.put(fractalSimd.pixel_buffer.asIntBuffer());
+          //cambiar a FractalHilos  
+        } else if (mode == 3) {
+            try {
+                fractalHilos.generarFractalParalelo(FractalParams.xMin, FractalParams.yMin, FractalParams.xMax, FractalParams.yMax,
+                        FractalParams.WIDTH, FractalParams.HEIGHT);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            pixelBuffer.put(fractalHilos.pixel_buffer);
         }
 
         pixelBuffer.flip();

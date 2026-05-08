@@ -30,7 +30,7 @@ public class FractalCpu {
         if (iter < FractalParams.max_iteraciones) {
             // nomras > 2
             int index = iter % FractalParams.PALETTE_SIZE;
-            return FractalParams.color_ramp[index];
+            return FractalParams.color_ramp1[index];
         }
 
         // los bits esta alreves en cuanto a los colores
