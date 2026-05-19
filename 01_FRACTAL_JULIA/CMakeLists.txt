@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(01_FRACTAL_JULIA)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2 -fopenmp" )
 
 
 find_package(fmt CONFIG REQUIRED)
@@ -19,6 +19,7 @@ main.cpp
 fractal_serial.cpp
 palette.cpp
 fractal_simd.cpp
+fractal_openmp.cpp
 )
 
 target_link_libraries(01_FRACTAL_JULIA PRIVATE 
