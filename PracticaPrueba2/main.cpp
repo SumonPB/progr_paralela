@@ -68,7 +68,7 @@ int main()
         pixel_buffer[i] = px;
     }
 
-    stbi_image_free(rgba);
+    stbi_image_free(rgba); // Liberar buffer original de stb_image
 
     // =========================
     // SFML

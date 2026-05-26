@@ -3,6 +3,21 @@
 #include <immintrin.h>
 #include <cstdint>
 #include <omp.h>
+//_mm256_set1_ps -> almacenar un valor float en todos los elementos de un registro AVX
+//_mm256_set1_epi32 -> almacenar un valor entero en todos los elementos de un registro AVX
+//_mm256_loadu_si256 -> cargar 8 enteros de 32 bits desde memoria a un registro AVX
+//_mm256_and_si256 -> operación AND bit a bit entre dos registros AVX
+//_mm256_srli_epi32 -> desplazar a la derecha los bits de cada entero
+//_mm256_cvtepi32_ps -> convertir enteros de 32 bits a flotantes de 32 bits
+//_mm256_mul_ps -> multiplicar dos registros AVX de flotantes
+//_mm256_add_ps -> sumar dos registros AVX de flotantes
+//_mm256_cvttps_epi32 -> convertir flotantes de 32 bits a enteros de 32 bits con truncamiento
+//_mm256_slli_epi32 -> desplazar a la izquierda los bits de cada entero
+//_mm256_or_si256 -> operación OR bit a bit entre dos registros AVX
+//_mm256_storeu_si256 -> almacenar 8 enteros de 32 bits desde un registro AVX a memoria
+//(__m256i*)&pixel_buffer[i] hacer un cast del puntero a un puntero a __m256i para cargar 8 píxeles a la vez
+
+
 
 // ======================================================
 // SIMD (AVX)
@@ -60,11 +75,7 @@ void Gray_SIMD(uint32_t *pixel_buffer, int ancho, int alto)
         // ======================================================
 
         __m256 gray =
-            _mm256_add_ps(
-                _mm256_add_ps(
-                    _mm256_mul_ps(rf, rFactor),
-                    _mm256_mul_ps(gf, gFactor)),
-                _mm256_mul_ps(bf, bFactor));
+            _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(rf, rFactor),_mm256_mul_ps(gf, gFactor)),_mm256_mul_ps(bf, bFactor));
 
         __m256i gray_i =
             _mm256_cvttps_epi32(gray);
@@ -131,18 +142,15 @@ void Gray_OPENMP(uint32_t *pixel_buffer, int ancho, int alto)
 
     int num_threads = omp_get_max_threads();
 
-    int chunk = total / num_threads;
+    int delta = total / num_threads;
 
 #pragma omp parallel
     {
-        int tid = omp_get_thread_num();
+        int threadId = omp_get_thread_num();
 
-        int start = tid * chunk;
+        int start = threadId * delta;
 
-        int end =
-            (tid == num_threads - 1)
-            ? total
-            : start + chunk;
+        int end =(threadId == num_threads - 1) ? total: start + delta;
 
         for (int i = start; i < end; i++)
         {
