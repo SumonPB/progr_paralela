@@ -109,7 +109,7 @@ int main(int argc, char **argv)
             MPI_COMM_WORLD,
             MPI_STATUS_IGNORE);
 
-          if (rank==2)
+          if (rank==3)
           {
             imprimir_matriz(A_local,rows,matrix_dim);
           }
