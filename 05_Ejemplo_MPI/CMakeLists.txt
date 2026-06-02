@@ -15,12 +15,12 @@ include_directories(
      )
 
 
-add_executable(ejemplo-mpi
-main.cpp
+add_executable(matrices-mul
 
+matrices_mult.cpp
 )
 
-target_link_libraries(ejemplo-mpi PRIVATE 
+target_link_libraries(matrices-mul PRIVATE 
 fmt::fmt 
 ${MPI_LIB}/impi.lib
 )
