@@ -31,7 +31,7 @@ void Gray_SIMD(uint32_t *pixel_buffer, int ancho, int alto)
     __m256 gFactor = _mm256_set1_ps(0.72f);
     __m256 bFactor = _mm256_set1_ps(0.07f);
 
-    __m256i mask = _mm256_set1_epi32(0xFF);
+    __m256i mask = _mm256_set1_epi32(0xFF); 
 
     for (; i <= total - 8; i += 8)
     {

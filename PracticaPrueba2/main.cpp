@@ -24,7 +24,7 @@ int main()
     // =========================
     uint8_t *rgba =
         stbi_load(
-            "img.png",
+            "perro.jpg",
             &width,
             &height,
             &channels,
