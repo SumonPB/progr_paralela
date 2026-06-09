@@ -68,7 +68,7 @@ int main(int argc, char **argv)
         }
         for (int i = 0; i < MATRIX_DIH; i++)
         {
-            B[i] = 1;
+            B[i] = 1.0;
         }
 
         // numero de filas y columnas por procesos
