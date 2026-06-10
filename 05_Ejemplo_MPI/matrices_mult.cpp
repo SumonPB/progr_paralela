@@ -2,14 +2,15 @@
 #include <fmt/core.h>
 #include <mpi.h>
 #include <vector>
+#include <cmath>
+
 #define MATRIX_DIH 25
 
-#include <vector>
-#include <iostream>
 
 void imprimir_matriz(const std::vector<double>& A_local,
                      int rows,
                      int matrix_dim) {
+
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < matrix_dim; j++) {
             std::cout << A_local[i * matrix_dim + j] << " ";
@@ -18,173 +19,261 @@ void imprimir_matriz(const std::vector<double>& A_local,
     }
 }
 
+
 void imprimir_vector(const std::vector<double>& v) {
+
     for (int i = 0; i < v.size(); i++) {
         std::cout << v[i] << " ";
-        }
-        std::cout << std::endl;
     }
-void multiplicar_matriz_vector(std::vector<double>& A,
-                              std::vector<double>& b,
-                              std::vector<double>& X,
-                              int rows,
-                              int cols)
-                              
+
+    std::cout << std::endl;
+}
+
+
+
+void multiplicar_matriz_vector(
+    std::vector<double>& A,
+    std::vector<double>& b,
+    std::vector<double>& X,
+    int rows,
+    int cols
+)
 {
     for (int i = 0; i < rows; i++) {
-        double sum = 0.0;
-        for (int j = 0; j < cols; j++) {
-            sum += A[i * cols + j] * b[j];
-        }
-        X[i] = sum;
-        
-          }
 
+        double sum = 0.0;
+
+        for (int j = 0; j < cols; j++) {
+
+            sum += A[i * cols + j] * b[j];
+
+        }
+
+        X[i] = sum;
+    }
 }
+
+
 
 int main(int argc, char **argv)
 {
 
-    MPI_Init(&argc, &argv);
-    int nprocs, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Init(&argc,&argv);
 
-    // numero de filas para cada RANK (proceso)
 
-    if (rank == 0)
+    int nprocs;
+    int rank;
+
+
+    MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+
+
+
+    int rows_per_rank = std::ceil(
+        MATRIX_DIH * 1.0 / nprocs
+    ); // filas por proceso, con padding
+
+
+    int padded_rows = rows_per_rank * nprocs; // filas totales con padding
+
+
+
+    if(rank == 0)
     {
-        std::vector<double> A(MATRIX_DIH * MATRIX_DIH);
-        std::vector<double> B(MATRIX_DIH);
-        std::vector<double> X(MATRIX_DIH);
-        // inicializar la matriz A y el vector b
-        for (int i = 0; i < MATRIX_DIH; i++)
-        {
-            for (int j = 0; j < MATRIX_DIH; j++)
-            {
-                int index = i * MATRIX_DIH + j;
-                A[index] = i;
-            }
-        }
-        for (int i = 0; i < MATRIX_DIH; i++)
-        {
-            B[i] = 1.0;
-        }
 
-        // numero de filas y columnas por procesos
-        int rows_per_rank = std::ceil(MATRIX_DIH * 1.0 / nprocs);
-        int padding = rows_per_rank * nprocs - MATRIX_DIH;
-        //fmt::print("MATRIX_DIM{}, nprocs:{}, rows_per_rank:{},padding :{}\n", MATRIX_DIH, nprocs, rows_per_rank, padding);
-        // enviar dimensiones y datos
-        for (int i = 0; i < nprocs; i++)
+        std::vector<double> A(
+            padded_rows * MATRIX_DIH,
+            0
+        ); // matriz A con padding, inicializada a 0
+
+
+        std::vector<double> B(
+            MATRIX_DIH
+        );
+
+
+        std::vector<double> X(
+            padded_rows,
+            0
+        ); // vector resultado con padding, inicializado a 0
+
+
+        for(int i=0;i<MATRIX_DIH;i++)
         {
-            int fila = rows_per_rank;
-            if (nprocs - 1 == i)
+
+            for(int j=0;j<MATRIX_DIH;j++)
             {
-                fila = rows_per_rank - padding;
+
+                A[i*MATRIX_DIH+j] = i;
+
             }
 
-            // enviar dimensiones
-            std::vector<int> data = {MATRIX_DIH, fila};
+        }
+
+        // vector b
+
+        for(int i=0;i<MATRIX_DIH;i++)
+        {
+            B[i]=1;
+        }
+        
+        //envio de datos a los procesos
+        for(int i=0;i<nprocs;i++)
+        {
+
+            std::vector<int> info = {
+                MATRIX_DIH,
+                rows_per_rank
+            }; // información de la matriz y filas asignadas a cada proceso
+
             MPI_Send(
-                data.data(),   // buffer de datos
-                2,             // data.size(),   // cuanto
-                MPI_INT,       // Tipo de dato
-                i,             // Rank de destino
-                0,             // TAG
-                MPI_COMM_WORLD // Grupo
+                info.data(),
+                2,
+                MPI_INT,
+                i,
+                0,
+                MPI_COMM_WORLD
             );
 
-            const double *Buffer = A.data();
-            // enviar datos al rank i
             MPI_Send(
-                &Buffer[i * rows_per_rank * MATRIX_DIH], // buffer de datos
-                fila * MATRIX_DIH,                     // data.size(),   // cuanto
-                MPI_DOUBLE,                            // Tipo de dato
-                i,                                     // Rank de destino
-                0,                                     // TAG
-                MPI_COMM_WORLD                         // Grupo
+                A.data()+i*rows_per_rank*MATRIX_DIH,
+                rows_per_rank*MATRIX_DIH,
+                MPI_DOUBLE,
+                i,
+                0,
+                MPI_COMM_WORLD
+            ); // enviar bloque de filas de A a cada proceso con el padding incluido
+
+            MPI_Send(
+                B.data(),
+                MATRIX_DIH,
+                MPI_DOUBLE,
+                i,
+                0,
+                MPI_COMM_WORLD
             );
 
-            //enviar vector b
-                        MPI_Send(
-                B.data(), // buffer de datos
-                MATRIX_DIH,                            // data.size(),   // cuanto
-                MPI_DOUBLE,                            // Tipo de dato
-                i,                                     // Rank de destino
-                0,                                     // TAG
-                MPI_COMM_WORLD                         // Grupo
-            );
         }
 
-    //fmt::print("RANK_{}, {} x {}", rank, rows_per_rank, MATRIX_DIH);
-                  
-       
-        multiplicar_matriz_vector(A,B,X,rows_per_rank,MATRIX_DIH);
+        std::vector<double> A_local(
+            rows_per_rank*MATRIX_DIH
+        );
 
-        for (int i = 1; i < nprocs; i++)
+        for(int i=0;i<rows_per_rank;i++)
         {
-             int fila = rows_per_rank;
-            if (nprocs - 1 == i)
+            for(int j=0;j<MATRIX_DIH;j++)
             {
-                fila = rows_per_rank - padding;
+
+                A_local[i*MATRIX_DIH+j] =
+                A[i*MATRIX_DIH+j];
+
             }
+        }
+
+        std::vector<double> X_local(
+            rows_per_rank
+        );
+
+        multiplicar_matriz_vector(
+            A_local,
+            B,
+            X_local,
+            rows_per_rank,
+            MATRIX_DIH
+        );
+
+        for(int i=0;i<rows_per_rank;i++)
+        {
+            X[i]=X_local[i];
+        }
+
+        //recibir resultados
+        
+        for(int i=1;i<nprocs;i++)
+        {
 
             MPI_Recv(
-            X.data()+i*rows_per_rank,
-            fila,
-            MPI_DOUBLE,
-            i,
-            0,
-            MPI_COMM_WORLD,
-            MPI_STATUS_IGNORE);
+                X.data()+i*rows_per_rank,
+                rows_per_rank,
+                MPI_DOUBLE,
+                i,
+                0,
+                MPI_COMM_WORLD,
+                MPI_STATUS_IGNORE
+            );
+
         }
-              fmt::print("RANK_{}, resultado parcial:\n", rank);
-          imprimir_vector(X);
+
+        std::cout<<"\nRESULTADO FINAL\n";
+    
+        //quitar padding
+        std::vector<double> resultado(
+            X.begin(),
+            X.begin()+MATRIX_DIH
+        );
+
+
+        imprimir_vector(resultado);
+
     }
 
     else
     {
-        std::vector<int> data_rec(2);
-        std::vector<double> b_local(MATRIX_DIH);
+        std::vector<int> info(2); // vector para recibir la información de la matriz y filas asignadas a cada proceso
+
         MPI_Recv(
-            data_rec.data(),
+            info.data(),
             2,
             MPI_INT,
             0,
             0,
             MPI_COMM_WORLD,
-            MPI_STATUS_IGNORE);
-        int matrix_dim = data_rec[0];
-        int rows = data_rec[1];
-        //fmt::print("RANK_{}, {} x {}", rank, matrix_dim, rows);
+            MPI_STATUS_IGNORE
+        );
 
-        std::vector<double> A_local(rows * matrix_dim);
+        int matrix_dim = info[0];
+        int rows = info[1];
+
+        std::vector<double> A_local(
+            rows*matrix_dim
+        );
+
+        std::vector<double> B(
+            matrix_dim
+        );
+
         MPI_Recv(
             A_local.data(),
-            rows * matrix_dim,
+            rows*matrix_dim,
             MPI_DOUBLE,
             0,
             0,
             MPI_COMM_WORLD,
-            MPI_STATUS_IGNORE);
+            MPI_STATUS_IGNORE
+        );
 
         MPI_Recv(
-            b_local.data(),
-            MATRIX_DIH,
+            B.data(),
+            matrix_dim,
             MPI_DOUBLE,
             0,
             0,
             MPI_COMM_WORLD,
-            MPI_STATUS_IGNORE);
+            MPI_STATUS_IGNORE
+        );
 
-          //if (rank==2)
-          //{
-           // imprimir_matriz(A_local,rows,matrix_dim);
-            //imprimir_vector(b_local,matrix_dim);
-         // }
-          std::vector<double> X_local(rows);
-          multiplicar_matriz_vector(A_local,b_local,X_local,rows,matrix_dim);
+        std::vector<double> X_local(
+            rows
+        );
+
+        multiplicar_matriz_vector(
+            A_local,
+            B,
+            X_local,
+            rows,
+            matrix_dim
+        );
 
         MPI_Send(
             X_local.data(),
@@ -192,9 +281,12 @@ int main(int argc, char **argv)
             MPI_DOUBLE,
             0,
             0,
-            MPI_COMM_WORLD);
+            MPI_COMM_WORLD
+        );
+
     }
 
     MPI_Finalize();
+
     return 0;
 }
