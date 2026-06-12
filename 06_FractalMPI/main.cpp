@@ -82,8 +82,10 @@ void setup_ui()
             }
         }
 
-                              //notificar a los otros ransk que la app se esta cerrando
-            MPI_Bcast(&running, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        //notificar a los otros ransk que la app se esta cerrando
+        std::vector<int> dummy = {max_iteraciones,running};
+        MPI_Bcast(dummy.data(), 2, MPI_INT, 0, MPI_COMM_WORLD);
+
         if (running==0)
         {
             break;
@@ -154,14 +156,21 @@ int main(int argc, char **argv)
     {
         while (true)
         {
-        MPI_Bcast(&running, 1, MPI_INT, 0, MPI_COMM_WORLD); // recibir notificación de cierre
+        std::vector<int> dummy = {max_iteraciones,0};
+        MPI_Bcast(dummy.data(), 2, MPI_INT, 0, MPI_COMM_WORLD); // recibir notificación de cierre
+        max_iteraciones = dummy[0];
+        running = dummy[1];
         if (running == 0)
         {
             fmt::print("Rank {}: received shutdown signal, exiting...\n", rank);
             break;
         }
-        //julia_mpi(x_min, y_min, x_max, y_max, ANCHO, ALTO, rows_start, rows_end, pixel_buffer);
-        
+        julia_mpi(x_min, y_min, x_max, y_max, ANCHO, ALTO, rows_start, rows_end, pixel_buffer);
+        if(rank==1)
+        {
+            fmt::print("Rank {}: max_iteraciones = {}\n", rank, max_iteraciones);
+            std::cout.flush();
+        }
         }
 
         

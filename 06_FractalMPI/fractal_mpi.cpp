@@ -59,7 +59,7 @@ void julia_mpi(double x_min, double y_min, double x_max, double y_max,
             auto color = acotado_2(x, y);
 
             // index j*w + i
-            pixel_buffer[j * width + i] = color;
+            pixel_buffer[(j - row_start) * width + i] = color;
         }
     }
 }
