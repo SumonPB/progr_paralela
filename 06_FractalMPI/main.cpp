@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <iostream>
 // Parameteros
 #include <complex>
@@ -68,10 +72,10 @@ void setup_ui()
     // sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     sf::RenderWindow window(sf::VideoMode({ANCHO, ALTO}), "Fractal MPI");
 
-//#ifdef _WIN32
-    //HWND hwnd = window.getNativeHandle();
-    //ShowWindow(hwnd, SW_MAXIMIZE); // Maximizar Ventana
-//#endif
+#ifdef _WIN32
+    HWND hwnd = window.getNativeHandle();
+    ShowWindow(hwnd, SW_MAXIMIZE); // Maximizar Ventana
+#endif
 
     sf::Texture texture({ANCHO, ALTO});
     texture.update((const uint8_t *)texture_buffer);

@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <fmt/core.h>
 #include <SFML/Graphics.hpp>
 #include <omp.h>
@@ -6,9 +10,6 @@
 #include "fractal_serial.h"
 #include "fractal_simd.h"
 #include "fractal_openmp.h"
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 // Pamarametro img
 #define ANCHO 1600
