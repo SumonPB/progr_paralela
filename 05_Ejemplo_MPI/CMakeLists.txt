@@ -15,12 +15,12 @@ include_directories(
      )
 
 
-add_executable(matrices-mul
+add_executable(Prueba2
 
-matrices_mult.cpp
+Prueba2.cpp
 )
 
-target_link_libraries(matrices-mul PRIVATE 
+target_link_libraries(Prueba2 PRIVATE 
 fmt::fmt 
 ${MPI_LIB}/impi.lib
 )
