@@ -15,12 +15,12 @@ include_directories(
      )
 
 
-add_executable(Prueba2
+add_executable(PruebaColectivoFile
 
-Prueba2.cpp
+PruebaColectivoFile.cpp
 )
 
-target_link_libraries(Prueba2 PRIVATE 
+target_link_libraries(PruebaColectivoFile PRIVATE 
 fmt::fmt 
 ${MPI_LIB}/impi.lib
 )

@@ -1,93 +1,142 @@
-#include<mpi.h>
-#include<vector>
-#include<cmath>
-#include<iostream>
+#include <fmt/core.h>
+#include <mpi.h>
+#include <iostream>
+#include <vector>
+#include <math.h>
+int VECSIZE = 19;
 
-int VSIZE=21;
+void multiplicarMatriz(std::vector<int> &a, std::vector<int> &b, std::vector<int> &x)
+{
+    for (int i = 0; i < a.size(); i++)
+    {
+        x[i] = a[i] * b[i];
+    }
+}
+
 int main(int argc, char **argv)
 {
-    std::vector<int> vec (VSIZE,0);
-    for (size_t i = 0; i < VSIZE; i++)
+    std::vector<int> A(VECSIZE, 0);
+    std::vector<int> B(VECSIZE, 2);
+    std::vector<int> X(VECSIZE, 0);
+
+    for (int i = 0; i < A.size(); i++)
     {
-        vec[i] = i;
+        A[i] = i;
     }
-    
-    MPI_Init(&argc,&argv);
-    int rack,nprocs;
-    MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
-    MPI_Comm_rank(MPI_COMM_WORLD,&rack);
-    if (rack==0)
+
+    MPI_Init(&argc, &argv);
+    int rank, nprocs;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    if (rank == 0)
     {
-        int padding = std::ceil(VSIZE*1.0/nprocs);
-
-
-        for (size_t i = 1; i < nprocs; i++)
+        int padding = std::ceil(VECSIZE * 1.0 / nprocs);
+        for (int i = 0; i < nprocs; i++)
         {
-            int cantidad;
-                if (i==nprocs-1)
+            int nDatos = padding;
+            if (i == nprocs - 1)
             {
-                cantidad = VSIZE-(padding*(nprocs-1));
-            }else{
-                cantidad=padding;
+                nDatos = (VECSIZE - ((nprocs - 1) * padding));
             }
-                std::vector<int> info {cantidad};
-                    MPI_Send(
-            info.data(),
-            1,
-            MPI_INT,
-            i,
-            0,
-            MPI_COMM_WORLD
-        );
-        MPI_Send(
-            vec.data()+(i*padding),
-            cantidad,
-            MPI_INT,
-            i,
-            0,
-            MPI_COMM_WORLD
-        );
 
+            MPI_Send(
+                &nDatos,
+                1,
+                MPI_INT,
+                i,
+                0,
+                MPI_COMM_WORLD);
+            MPI_Send(
+                A.data() + i * padding,
+                nDatos,
+                MPI_INT,
+                i,
+                0,
+                MPI_COMM_WORLD);
+            MPI_Send(
+                B.data() + i * padding,
+                nDatos,
+                MPI_INT,
+                i,
+                0,
+                MPI_COMM_WORLD);
 
+            std::vector<int> aTMP(nDatos);
+            std::vector<int> bTMP(nDatos);
+            std::vector<int> xTMP(nDatos);
+
+            for (int j = 0; j < nDatos; j++)
+            {
+                aTMP[j] = A[j];
+                bTMP[j] = B[j];
+            }
+
+            multiplicarMatriz(aTMP, bTMP, xTMP);
+
+            for (int j = 0; j < nDatos; j++)
+            {
+                X[j] = xTMP[j];
+            }
+
+            MPI_Recv(
+                X.data() + (i * padding),
+                nDatos,
+                MPI_INT,
+                i,
+                0,
+                MPI_COMM_WORLD,
+                MPI_STATUS_IGNORE);
         }
-        //std::cout<<padding<<std::endl;
-
-
-        
-    }else{
-        int padding;
+        for (int i = 0; i < X.size(); i++)
+        {
+            printf("\n %d", X[i]);
+        }
+    }
+    else
+    {
+        int nDatos;
         MPI_Recv(
-            &padding,
+            &nDatos,
             1,
             MPI_INT,
             0,
             0,
             MPI_COMM_WORLD,
-            MPI_STATUS_IGNORE
-        );
-        std::vector<int> vecTMP(padding);
+            MPI_STATUS_IGNORE);
+        // printf("\n Procesar %d",nDatos);
+        std::vector<int> aTMP(nDatos);
+        std::vector<int> bTMP(nDatos);
+        std::vector<int> xTMP(nDatos);
+
         MPI_Recv(
-            vecTMP.data(),
-            padding,
+            aTMP.data(),
+            nDatos,
             MPI_INT,
             0,
             0,
             MPI_COMM_WORLD,
-            MPI_STATUS_IGNORE
-        );
+            MPI_STATUS_IGNORE);
+        MPI_Recv(
+            bTMP.data(),
+            nDatos,
+            MPI_INT,
+            0,
+            0,
+            MPI_COMM_WORLD,
+            MPI_STATUS_IGNORE);
 
-        //std::cout<<padding<<std::endl;
-        std::cout<<"--------------"<<std::endl;
+        multiplicarMatriz(aTMP, bTMP, xTMP);
 
-            for (size_t i = 0; i < vecTMP.size(); i++)
-            {
-                 std::cout<<vecTMP[i]<<std::endl;
-            }
-
+        MPI_Send(
+            xTMP.data(),
+            nDatos,
+            MPI_INT,
+            0,
+            0,
+            MPI_COMM_WORLD);
     }
-    
-
 
     MPI_Finalize();
+
     return 0;
 }
